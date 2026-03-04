@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoescuela NextGen | Dénia - Formación Vial del Futuro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --charcoal: #0a0a0a;
+            --electric-cyan: #00f2ff;
+            --lime-green: #32ff7e;
+            --asphalt: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--charcoal);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .road-lines {
+            background-image: linear-gradient(to bottom, transparent 50%, var(--charcoal) 50%),
+                              linear-gradient(to right, #333 1px, transparent 1px);
+            background-size: 100% 40px, 100% 100%;
+            opacity: 0.1;
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, var(--electric-cyan), var(--lime-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-glass {
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-drive {
+            background: var(--electric-cyan);
+            color: var(--charcoal);
+            font-weight: 800;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-drive:hover {
+            box-shadow: 0 0 25px var(--electric-cyan);
+            transform: translateY(-2px);
+        }
+
+        .n-logo {
+            transform: rotate(-15deg);
+            display: inline-block;
+            box-shadow: 4px 4px 0 var(--electric-cyan);
+        }
+
+        .page-section {
+            display: none;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .gauge-container {
+            width: 120px;
+            height: 60px;
+            border-top-left-radius: 100px;
+            border-top-right-radius: 100px;
+            border: 2px solid rgba(0, 242, 255, 0.2);
+            border-bottom: 0;
+            position: relative;
+        }
+
+        .needle {
+            width: 2px;
+            height: 50px;
+            background: var(--lime-green);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            box-shadow: 0 0 10px var(--lime-green);
+        }
+
+        .road-divider {
+            height: 2px;
+            background: repeating-linear-gradient(to right, var(--electric-cyan), var(--electric-cyan) 20px, transparent 20px, transparent 40px);
+            width: 100%;
+            opacity: 0.2;
+        }
+
+        .permiso-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <div class="road-lines"></div>
+
+    <!-- Navegación -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="#" onclick="showPage('home')" class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded flex items-center justify-center font-black text-2xl text-black n-logo">N</div>
+                    <div>
+                        <span class="text-xl font-black tracking-tighter block leading-none">NEXT<span class="text-[#00f2ff]">GEN</span></span>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold leading-none">Dénia Hub</span>
+                    </div>
+                </a>
+                
+                <div id="main-nav" class="hidden md:flex space-x-8 items-center text-[10px] uppercase tracking-[0.2em] font-bold">
+                    <a href="#" onclick="showPage('home')" class="nav-link text-[#00f2ff]">Inicio</a>
+                    <a href="#" onclick="showPage('metodo')" class="nav-link hover:text-[#00f2ff] transition">Método</a>
+                    <a href="#" onclick="showPage('vr')" class="nav-link hover:text-[#00f2ff] transition">VR Training</a>
+                    <a href="#" onclick="showPage('flota')" class="nav-link hover:text-[#00f2ff] transition">Flota</a>
+                    <a href="#" onclick="showPage('contacto')" class="btn-drive px-5 py-2 rounded text-black text-[10px]">Matrícula</a>
+                </div>
+
+                <div class="md:hidden">
+                    <button id="menu-btn" class="p-2 text-white"><i data-lucide="menu"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow relative z-10">
+        
+        <!-- PÁGINA: HOME (COMPLETA) -->
+        <section id="page-home" class="page-section active">
+            
+            <!-- Hero Section -->
+            <div class="pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 max-w-7xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-6">
+                            <span class="w-2 h-2 bg-[#32ff7e] rounded-full animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-[#32ff7e]">Abierta la matriculación 2026</span>
+                        </div>
+                        <h1 class="text-6xl lg:text-8xl font-black leading-[0.85] mb-8 uppercase italic">
+                            Liderando la <br> <span class="gradient-text">Nueva Era.</span>
+                        </h1>
+                        <p class="text-gray-400 text-lg mb-10 max-w-xl font-light leading-relaxed">
+                            No solo te enseñamos a aprobar. Te entrenamos para la movilidad inteligente en Dénia con simuladores VR y vehículos Tesla 100% eléctricos.
+                        </p>
+                        <div class="flex flex-wrap gap-6">
+                            <button onclick="scrollToId('permisos')" class="btn-drive px-10 py-5 rounded text-sm">Explorar Permisos</button>
+                            <div class="flex items-center space-x-3 text-gray-500">
+                                <i data-lucide="verified" class="w-5 h-5 text-[#32ff7e]"></i>
+                                <span class="text-[10px] font-black uppercase tracking-widest leading-none">Certificación <br>Eco-Drive 2026</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden lg:block relative">
+                         <!-- Visual representativo del dashboard -->
+                         <div class="card-glass p-10 rounded-[40px] border-white/10">
+                            <div class="flex justify-between items-center mb-10">
+                                <p class="text-[10px] font-black uppercase text-gray-500 tracking-widest">NextGen Telemetry v4.0</p>
+                                <div class="px-3 py-1 bg-[#00f2ff]/10 rounded text-[#00f2ff] text-[10px] font-black uppercase italic">Live Sync</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-8 mb-10">
+                                <div class="text-center">
+                                    <div class="gauge-container mx-auto mb-4"><div class="needle" style="transform: rotate(35deg);"></div></div>
+                                    <p class="text-2xl font-black tracking-tighter">84%</p>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Skill Transfer</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="gauge-container mx-auto mb-4"><div class="needle" style="transform: rotate(-15deg); background:var(--electric-cyan)"></div></div>
+                                    <p class="text-2xl font-black tracking-tighter">0.0</p>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">CO2 Emission</p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center space-x-4">
+                                <div class="w-10 h-10 bg-[#32ff7e] rounded-full flex items-center justify-center text-black">
+                                    <i data-lucide="zap" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold italic">8 horas de ahorro directo</p>
+                                    <p class="text-[10px] text-gray-500 uppercase">Media por alumno vía VR Training</p>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Permisos -->
+            <div id="permisos" class="py-24 bg-white/5">
+                <div class="max-w-7xl mx-auto px-4">
+                    <div class="text-center mb-20">
+                        <h2 class="text-4xl lg:text-5xl font-black uppercase italic mb-4">Nuestros <span class="text-[#00f2ff]">Permisos</span></h2>
+                        <p class="text-gray-500 uppercase tracking-widest text-xs font-bold">Selecciona tu categoría de formación</p>
+                    </div>
+
+                    <!-- Grid de Permisos de Moto -->
+                    <div class="mb-20">
+                        <div class="flex items-center space-x-4 mb-10">
+                            <i data-lucide="bike" class="text-[#00f2ff] w-8 h-8"></i>
+                            <h3 class="text-2xl font-black uppercase italic tracking-tighter">Permisos de Moto</h3>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- AM -->
+                            <div class="card-glass p-6 rounded-2xl border-l-4 border-white/20 hover:border-[#00f2ff]">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="permiso-badge px-3 py-1 rounded text-xl font-black">AM</div>
+                                    <span class="text-[10px] font-bold text-[#32ff7e] uppercase tracking-widest">Desde 15 años</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-400 mb-2 uppercase">Ciclomotores</p>
+                                <p class="text-sm text-gray-500">Vehículos de dos o tres ruedas hasta 50cc.</p>
+                            </div>
+                            <!-- A1 -->
+                            <div class="card-glass p-6 rounded-2xl border-l-4 border-white/20 hover:border-[#00f2ff]">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="permiso-badge px-3 py-1 rounded text-xl font-black">A1</div>
+                                    <span class="text-[10px] font-bold text-[#32ff7e] uppercase tracking-widest">Desde 16 años</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-400 mb-2 uppercase">Motos hasta 125cc</p>
+                                <p class="text-sm text-gray-500">Potencia máxima de 11 kW y relación potencia/peso de 0,1 kW/kg.</p>
+                            </div>
+                            <!-- A2 -->
+                            <div class="card-glass p-6 rounded-2xl border-l-4 border-white/20 hover:border-[#00f2ff]">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="permiso-badge px-3 py-1 rounded text-xl font-black">A2</div>
+                                    <span class="text-[10px] font-bold text-[#32ff7e] uppercase tracking-widest">Desde 18 años</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-400 mb-2 uppercase">Motos hasta 35 kW</p>
+                                <p class="text-sm text-gray-500">Motos de potencia limitada y relación potencia/peso de 0,2 kW/kg.</p>
+                            </div>
+                            <!-- A -->
+                            <div class="card-glass p-6 rounded-2xl border-l-4 border-white/20 hover:border-[#00f2ff]">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="permiso-badge px-3 py-1 rounded text-xl font-black text-[#00f2ff]">A</div>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Experiencia</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-400 mb-2 uppercase">Todas las motos</p>
+                                <p class="text-sm text-gray-500">Requiere 2 años de experiencia con el A2 y realizar un curso de formación.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Permiso de Coche (Destacado) -->
+                    <div class="mb-20">
+                        <div class="flex items-center space-x-4 mb-10">
+                            <i data-lucide="car" class="text-[#32ff7e] w-8 h-8"></i>
+                            <h3 class="text-2xl font-black uppercase italic tracking-tighter">Permiso de Coche</h3>
+                        </div>
+                        <div class="card-glass p-8 rounded-3xl border-l-8 border-[#32ff7e] relative overflow-hidden group">
+                            <div class="absolute right-0 top-0 opacity-5 -mr-10 -mt-10 group-hover:scale-110 transition duration-700">
+                                <i data-lucide="car" class="w-64 h-64"></i>
+                            </div>
+                            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                                <div class="max-w-xl">
+                                    <div class="flex items-center space-x-4 mb-4">
+                                        <div class="bg-white text-black px-6 py-2 rounded text-3xl font-black italic">B</div>
+                                        <span class="text-xs font-black uppercase tracking-widest text-[#32ff7e]">El más demandado</span>
+                                    </div>
+                                    <h4 class="text-2xl font-black uppercase italic mb-4 leading-none">Turismos y vehículos ligeros</h4>
+                                    <p class="text-gray-400 mb-6 font-light">
+                                        Válido para turismos hasta 3.500 kg y 9 plazas. Una vez transcurridos 3 años de antigüedad, este permiso también te permite conducir motos de hasta 125cc (A1).
+                                    </p>
+                                    <div class="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest">
+                                        <span class="px-3 py-1 bg-white/5 rounded">Max. 3.500 KG</span>
+                                        <span class="px-3 py-1 bg-white/5 rounded">9 Plazas Max.</span>
+                                        <span class="px-3 py-1 bg-white/5 rounded">Moto A1 (Tras 3 años)</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button onclick="showPage('contacto')" class="btn-drive px-12 py-6 rounded-xl text-sm w-full lg:w-auto">Arrancar Matrícula B</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Licencias Especiales -->
+                    <div>
+                        <div class="flex items-center space-x-4 mb-10">
+                            <i data-lucide="tractor" class="text-gray-400 w-8 h-8"></i>
+                            <h3 class="text-2xl font-black uppercase italic tracking-tighter">Licencias Especiales</h3>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- LCM -->
+                            <div class="card-glass p-8 rounded-2xl flex items-center space-x-6 border-l-4 border-white/10">
+                                <div class="bg-white/5 p-4 rounded-xl text-xl font-black italic">LCM</div>
+                                <div>
+                                    <h4 class="text-lg font-black uppercase italic mb-1 leading-none">Movilidad Reducida</h4>
+                                    <p class="text-sm text-gray-500 font-light italic">Vehículos específicos para personas con movilidad reducida.</p>
+                                </div>
+                            </div>
+                            <!-- LVA -->
+                            <div class="card-glass p-8 rounded-2xl flex items-center space-x-6 border-l-4 border-white/10">
+                                <div class="bg-white/5 p-4 rounded-xl text-xl font-black italic">LVA</div>
+                                <div>
+                                    <h4 class="text-lg font-black uppercase italic mb-1 leading-none">Vehículos Agrícolas</h4>
+                                    <p class="text-sm text-gray-500 font-light italic">Vehículos especiales agrícolas autopropulsados y sus conjuntos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metodología resumida -->
+            <div class="py-24">
+                <div class="max-w-7xl mx-auto px-4">
+                    <div class="grid lg:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <h2 class="text-4xl font-black uppercase italic mb-8">Del <span class="text-[#00f2ff]">Virtual</span> al <span class="text-[#32ff7e]">Real</span></h2>
+                            <div class="space-y-8">
+                                <div class="flex space-x-6">
+                                    <div class="text-3xl font-black text-[#00f2ff]/20 italic">01</div>
+                                    <div>
+                                        <h4 class="text-lg font-black uppercase italic leading-none mb-2">Gamified Theory</h4>
+                                        <p class="text-gray-500 text-sm">Completa el temario mediante retos y tests interactivos desde nuestra App. Disponible 24/7 para tu ritmo.</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-6">
+                                    <div class="text-3xl font-black text-[#00f2ff]/20 italic">02</div>
+                                    <div>
+                                        <h4 class="text-lg font-black uppercase italic leading-none mb-2">Immersion Training</h4>
+                                        <p class="text-gray-500 text-sm">Prácticas seguras en simuladores VR de alta fidelidad. Elimina el miedo inicial y automatiza movimientos.</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-6">
+                                    <div class="text-3xl font-black text-[#00f2ff]/20 italic">03</div>
+                                    <div>
+                                        <h4 class="text-lg font-black uppercase italic leading-none mb-2">Smart Practical</h4>
+                                        <p class="text-gray-500 text-sm">Finaliza tu formación en nuestra flota Tesla e híbrida en las calles de Dénia con instructores NextGen.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 grayscale hover:grayscale-0 transition duration-1000">
+                            <img src="https://images.unsplash.com/photo-1542362567-b054cc393679?auto=format&fit=crop&q=80&w=1200" alt="Driving Future" class="w-full h-[500px] object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIONES EN CONSTRUCCIÓN -->
+        <section id="page-metodo" class="page-section pt-32 pb-20 min-h-[70vh] flex items-center justify-center text-center px-4">
+            <div>
+                <div class="mb-8 flex justify-center"><div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 construction-glow"><i data-lucide="route" class="w-10 h-10 text-[#00f2ff]"></i></div></div>
+                <h2 class="text-4xl font-black mb-4 uppercase italic">Trazando el <span class="text-[#00f2ff]">Plan</span></h2>
+                <div class="road-divider mb-8"></div>
+                <p class="text-gray-500 text-lg max-w-md mx-auto">Esta subpágina técnica está siendo optimizada. El detalle del currículo digital se lanzará próximamente.</p>
+                <button onclick="showPage('home')" class="mt-10 px-6 py-2 border border-white/20 rounded text-[10px] uppercase font-bold tracking-widest hover:bg-white/5 transition">Regresar al garaje</button>
+            </div>
+        </section>
+
+        <section id="page-vr" class="page-section pt-32 pb-20 min-h-[70vh] flex items-center justify-center text-center px-4">
+            <div>
+                <div class="mb-8 flex justify-center"><div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 construction-glow"><i data-lucide="steering-wheel" class="w-10 h-10 text-[#00f2ff]"></i></div></div>
+                <h2 class="text-4xl font-black mb-4 uppercase italic">Simuladores <span class="text-white/20">Alpha</span></h2>
+                <div class="road-divider mb-8"></div>
+                <p class="text-gray-500 text-lg max-w-md mx-auto">Configurando cockpits inmersivos. Entrena en cualquier escenario de la Marina Alta sin salir del visor.</p>
+            </div>
+        </section>
+
+        <section id="page-flota" class="page-section pt-32 pb-20 min-h-[70vh] flex items-center justify-center text-center px-4">
+            <div>
+                <div class="mb-8 flex justify-center"><div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 construction-glow"><i data-lucide="car" class="w-10 h-10 text-[#32ff7e]"></i></div></div>
+                <h2 class="text-4xl font-black mb-4 uppercase italic">Hangares <span class="text-[#32ff7e]/20">EV</span></h2>
+                <div class="road-divider mb-8"></div>
+                <p class="text-gray-500 text-lg max-w-md mx-auto">Cargando flota 100% eléctrica. Prácticas silenciosas, potentes y sostenibles.</p>
+            </div>
+        </section>
+
+        <section id="page-contacto" class="page-section pt-32 pb-20 min-h-[70vh] flex items-center justify-center text-center px-4">
+            <div>
+                <div class="mb-8 flex justify-center"><div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10 construction-glow"><i data-lucide="key" class="w-10 h-10 text-white/40"></i></div></div>
+                <h2 class="text-4xl font-black mb-4 uppercase italic">Terminal de <span class="text-white/20">Registro</span></h2>
+                <div class="road-divider mb-8"></div>
+                <p class="text-gray-500 text-lg max-w-md mx-auto">Pasarela de inscripción digital en desarrollo. Contacta vía Dénia Hub para pre-reservas.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/5 bg-black/40 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-3 mb-6 md:mb-0">
+                    <div class="w-8 h-8 bg-white rounded flex items-center justify-center font-black text-black n-logo">N</div>
+                    <span class="font-black tracking-tighter uppercase text-sm">NextGen <span class="text-gray-500">Academy</span></span>
+                </div>
+                <div class="text-gray-500 text-[10px] text-center md:text-right font-bold tracking-[0.2em] uppercase">
+                    <p>2026 NextGen Dénia. Innovación en formación vial.</p>
+                    <div class="mt-4 space-x-6 flex justify-center md:justify-end">
+                        <a href="#" class="hover:text-[#00f2ff] transition text-gray-400">Legal</a>
+                        <a href="#" class="hover:text-[#32ff7e] transition text-gray-400">EV Policy</a>
+                        <a href="#" class="hover:text-white transition text-gray-400">Tech Hub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            const target = document.getElementById('page-' + pageId);
+            if (target) {
+                target.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+
+            // Update Nav visual
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('text-[#00f2ff]');
+            });
+
+            const nav = document.getElementById('main-nav');
+            if (nav && nav.classList.contains('flex-col')) {
+                toggleMobileMenu();
+            }
+        }
+
+        function scrollToId(id) {
+            const el = document.getElementById(id);
+            if(el) el.scrollIntoView({behavior: 'smooth'});
+        }
+
+        const menuBtn = document.getElementById('menu-btn');
+        const mainNav = document.getElementById('main-nav');
+
+        function toggleMobileMenu() {
+            mainNav.classList.toggle('hidden');
+            mainNav.classList.toggle('flex');
+            mainNav.classList.toggle('flex-col');
+            mainNav.classList.toggle('absolute');
+            mainNav.classList.toggle('top-20');
+            mainNav.classList.toggle('left-0');
+            mainNav.classList.toggle('w-full');
+            mainNav.classList.toggle('bg-black');
+            mainNav.classList.toggle('p-8');
+            mainNav.classList.toggle('space-y-6');
+            mainNav.classList.toggle('border-b');
+            mainNav.classList.toggle('border-white/10');
+        }
+
+        if (menuBtn) {
+            menuBtn.addEventListener('click', toggleMobileMenu);
+        }
+
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.getAttribute('href') === '#') {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
